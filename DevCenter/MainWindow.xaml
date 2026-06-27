@@ -1,12 +1,300 @@
 ﻿<Window x:Class="DevCenter.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:DevCenter"
-        mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" 
+        xmlns:viewmodel="clr-namespace:DevCenter.ViewModel" 
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+        xmlns:views="clr-namespace:DevCenter.Views"
+        Title="DevCenter"
+        Width="1400"
+        Height="850"
+        MinWidth="1200"
+        MinHeight="750"
+        WindowStartupLocation="CenterScreen"
+        Background="#0f0f0f">
 
+    <Window.Resources>
+
+        <!-- Nav item style -->
+        <Style x:Key="NavItemStyle" TargetType="RadioButton">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Foreground" Value="#999999"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="GroupName" Value="Navigation"/>
+            <Setter Property="Margin" Value="0, 4"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border x:Name="Bg"
+                                Background="Transparent"
+                                CornerRadius="7"
+                                Padding="10,7">
+                            <ContentPresenter/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bg" Property="Background" Value="#222222"/>
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="Bg" Property="Background" Value="#1e2a3a"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Icon text style (simulated via geometry; use text with icon font if available) -->
+        <Style x:Key="NavLabelStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#999999"/>
+            <Setter Property="FontSize" Value="13.5"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+
+        <Style x:Key="NavLabelActiveStyle" TargetType="TextBlock" BasedOn="{StaticResource NavLabelStyle}">
+            <Setter Property="Foreground" Value="#e8e8e8"/>
+            <Setter Property="FontWeight" Value="Medium"/>
+        </Style>
+
+        <Style x:Key="SectionLabelStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#555555"/>
+            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="FontWeight" Value="Medium"/>
+            <Setter Property="Margin" Value="8,8,0,4"/>
+        </Style>
+
+        <Style x:Key="TopbarButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="#1e2a45"/>
+            <Setter Property="BorderBrush" Value="#2f4070"/>
+            <Setter Property="BorderThickness" Value="0.5"/>
+            <Setter Property="Foreground" Value="#5b9cf6"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="Medium"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Padding" Value="13,6"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="7"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#243260"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="MetricCardStyle" TargetType="Border">
+            <Setter Property="Background" Value="#181818"/>
+            <Setter Property="BorderBrush" Value="#252525"/>
+            <Setter Property="BorderThickness" Value="0.5"/>
+            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="Padding" Value="16"/>
+        </Style>
+
+        <Style x:Key="MetricValueStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#e8e8e8"/>
+            <Setter Property="FontSize" Value="22"/>
+            <Setter Property="FontWeight" Value="Medium"/>
+            <Setter Property="Margin" Value="0,6,0,0"/>
+        </Style>
+
+        <Style x:Key="MetricSubStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#555555"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Margin" Value="0,3,0,0"/>
+        </Style>
+
+    </Window.Resources>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="220"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- ═══════════════════════════════════ SIDEBAR ═══════════════════════════════════ -->
+        <Grid Grid.Column="0" Background="#161616">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Logo header -->
+            <Border Grid.Row="0"
+                    BorderBrush="#2a2a2a"
+                    BorderThickness="0,0,0,0.5"
+                    Padding="16,20,16,12">
+                <StackPanel Orientation="Horizontal">
+                    <Border Background="#3b6fd4"
+                            CornerRadius="7"
+                            Width="26" Height="26"
+                            Margin="0,0,8,0">
+                        <TextBlock Text="&lt;/&gt;"
+                                   Foreground="White"
+                                   FontSize="10"
+                                   FontWeight="Medium"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"/>
+                    </Border>
+                    <TextBlock Text="DevCenter"
+                               Foreground="#e8e8e8"
+                               FontSize="14"
+                               FontWeight="Medium"
+                               VerticalAlignment="Center"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Nav items -->
+            <StackPanel Grid.Row="1" Margin="8,10,8,0">
+
+                <TextBlock Text="WORKSPACE" Style="{StaticResource SectionLabelStyle}"/>
+
+                <RadioButton Style="{StaticResource NavItemStyle}" 
+                             Command="{Binding GoToHomeCommand}"
+                             IsChecked="True">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="⊞" 
+                                   Foreground="#666666" 
+                                   FontSize="15" Width="18" 
+                                   VerticalAlignment="Center"/>
+                        <TextBlock Text="Home" 
+                                   Foreground="#e8e8e8" 
+                                   FontSize="13.5" 
+                                   FontWeight="Medium"
+                                   VerticalAlignment="Center" 
+                                   Margin="9,0,0,0"/>
+                    </StackPanel>
+                </RadioButton>
+
+                <RadioButton Style="{StaticResource NavItemStyle}"
+                             Command="{Binding GoToSnippetCommand}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="18"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="{}{}" 
+                                   Foreground="#666666" 
+                                   FontSize="14"
+                                   VerticalAlignment="Center" 
+                                   FontFamily="Consolas"/>
+                        <TextBlock Grid.Column="1" 
+                                   Text="Snippets" 
+                                   Style="{StaticResource NavLabelStyle}"
+                                   Margin="9,0,0,0"/>
+                        <Border Grid.Column="2" 
+                                Background="#1e2a3a" 
+                                CornerRadius="10" 
+                                Padding="6,1">
+                            <TextBlock Text="12" 
+                                       Foreground="#5b9cf6" 
+                                       FontSize="10" 
+                                       FontWeight="Medium"/>
+                        </Border>
+                    </Grid>
+                </RadioButton>
+
+                <RadioButton Style="{StaticResource NavItemStyle}"
+                             Command="{Binding GoToCommandsCommand}">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="⚡" 
+                                   Foreground="#666666" 
+                                   FontSize="13" 
+                                   Width="18" 
+                                   VerticalAlignment="Center"/>
+                        <TextBlock Text="Commands" 
+                                   Style="{StaticResource NavLabelStyle}"
+                                   Margin="9,0,0,0"/>
+                    </StackPanel>
+                </RadioButton>
+
+                <TextBlock Text="TOOLS" Style="{StaticResource SectionLabelStyle}" Margin="8,14,0,4"/>
+
+                <RadioButton Style="{StaticResource NavItemStyle}">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="⚙" 
+                                   Foreground="#666666" 
+                                   FontSize="14" Width="18" 
+                                   VerticalAlignment="Center"/>
+                        <TextBlock Text="Settings" 
+                                   Style="{StaticResource NavLabelStyle}" 
+                                   Margin="9,0,0,0"/>
+                    </StackPanel>
+                </RadioButton>
+
+            </StackPanel>
+
+            <!-- Right border line -->
+            <Border Grid.RowSpan="3"
+                    BorderBrush="#2a2a2a"
+                    BorderThickness="0,0,0.5,0"
+                    HorizontalAlignment="Right"
+                    Width="0.5"/>
+        </Grid>
+
+        <!-- ═══════════════════════════════════ MAIN ═══════════════════════════════════ -->
+        <Grid Grid.Column="1" Background="#111111">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- Topbar -->
+            <Border Grid.Row="0"
+                    BorderBrush="#222222"
+                    BorderThickness="0,0,0,0.5"
+                    Padding="24,16">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Column="0"
+                               Text="{Binding Navigation.CurrentTitle}"
+                               Foreground="#e8e8e8"
+                               FontSize="15"
+                               FontWeight="Medium"
+                               VerticalAlignment="Center"/>
+
+                    <!-- Search box -->
+                    <Border Grid.Column="1"
+                            Background="#1a1a1a"
+                            BorderBrush="#2a2a2a"
+                            BorderThickness="0.5"
+                            CornerRadius="7"
+                            Padding="11,6"
+                            Margin="0,0,12,0"
+                            Width="200">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="🔍" FontSize="12" Foreground="#555555" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                            <TextBlock Text="Search…" Foreground="#555555" FontSize="13" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+
+                    <Button Grid.Column="2"
+                            Style="{StaticResource TopbarButtonStyle}"
+                            Content="+ New"/>
+                </Grid>
+            </Border>
+
+            <Grid Grid.Row="1">
+                <Border Padding="24,16">
+                    <ContentControl Content="{Binding Navigation.CurrentViewModel}"/>
+                </Border>
+            </Grid>
+        </Grid>
     </Grid>
 </Window>
