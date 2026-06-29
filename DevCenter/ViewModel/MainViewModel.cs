@@ -22,5 +22,8 @@ namespace DevCenter.ViewModel
 
         [RelayCommand]
         private void GoToCommands() => Navigation.NavigateTo<CommandViewModel>();
+
+        [RelayCommand]
+        private void GoToCommandForm() => Navigation.NavigateTo<CommandFormViewModel>();
     }
 }

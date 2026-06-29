@@ -21,7 +21,7 @@ public partial class NavigationService : ObservableObject, INavigationService
     private object? _currentViewModel;
 
     public string CurrentTitle =>
-        (CurrentViewModel as dynamic)?.Title ?? string.Empty;
+        (CurrentViewModel as dynamic)?.Header ?? string.Empty;
 
 
     public void NavigateTo<TViewModel>() where TViewModel : ObservableObject

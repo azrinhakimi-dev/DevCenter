@@ -1,13 +1,11 @@
-﻿using DevCenter.Services;
+﻿using DevCenter.Repositories;
+using DevCenter.Services;
 using DevCenter.ViewModel;
 using Microsoft.Extensions.DependencyInjection;
 using System.Windows;
 
 namespace DevCenter
 {
-    /// <summary>
-    /// Interaction logic for App.xaml
-    /// </summary>
     public partial class App : Application
     {
         private readonly ServiceProvider _serviceProvider;
@@ -26,17 +24,26 @@ namespace DevCenter
             services.AddTransient<HomeViewModel>();
             services.AddTransient<SnippetViewModel>();
             services.AddTransient<CommandViewModel>();
+            services.AddTransient<CommandFormViewModel>();
 
+            services.AddDbContext<AppDbContext>();
+
+            services.AddScoped<DevCommandRepo>();
 
             _serviceProvider = services.BuildServiceProvider();
         }
 
         protected override void OnStartup(StartupEventArgs e)
         {
+            using (var scope = _serviceProvider.CreateScope())
+            {
+                var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                db.Database.EnsureCreated();
+            }
+
             var mainWindow = _serviceProvider.GetRequiredService<MainWindow>();
             mainWindow.Show();
             base.OnStartup(e);
         }
-
     }
 }

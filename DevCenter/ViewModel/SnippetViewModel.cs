@@ -5,6 +5,6 @@ namespace DevCenter.ViewModel
     public partial class SnippetViewModel : ObservableObject
     {
         [ObservableProperty]
-        private string _title = "Snippets";
+        private string _header = "Snippets";
     }
 }

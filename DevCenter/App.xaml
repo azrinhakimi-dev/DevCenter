@@ -17,5 +17,9 @@
             <views:CommandView/>
         </DataTemplate>
 
+        <DataTemplate DataType="{x:Type vm:CommandFormViewModel}">
+            <views:CommandFormView/>
+        </DataTemplate>
+
     </Application.Resources>
 </Application>
