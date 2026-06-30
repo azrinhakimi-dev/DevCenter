@@ -29,6 +29,8 @@ namespace DevCenter.ViewModel
 
         public INavigationService Navigation { get; }
 
+        public string SaveButtonText => _existing is null ? "Create" : "Save";
+
         // Create mode
         public CommandFormViewModel(DevCommandRepo repo, INavigationService navigation)
         {
@@ -41,6 +43,7 @@ namespace DevCenter.ViewModel
         {
             _repo = repo;
             _existing = existing;
+            Header = "Edit Command";
             Name = existing.Name;
             Description = existing.Description;
             Script = existing.Script;

@@ -5,8 +5,8 @@ namespace DevCenter.Services;
 
 public interface INavigationService
 {
-
     void NavigateTo<TViewModel>() where TViewModel : ObservableObject;
+    void NavigateTo<TViewModel>(params object[] parameters) where TViewModel : ObservableObject;
 }
 
 public partial class NavigationService : ObservableObject, INavigationService
@@ -17,6 +17,7 @@ public partial class NavigationService : ObservableObject, INavigationService
     {
         _services = service;
     }
+
     [ObservableProperty]
     private object? _currentViewModel;
 
@@ -26,12 +27,20 @@ public partial class NavigationService : ObservableObject, INavigationService
     public string CurrentPageDescription =>
         (CurrentViewModel as dynamic)?.PageDescription ?? string.Empty;
 
-
     public void NavigateTo<TViewModel>() where TViewModel : ObservableObject
     {
         CurrentViewModel = _services.GetRequiredService<TViewModel>();
         OnPropertyChanged(nameof(CurrentTitle));
         OnPropertyChanged(nameof(CurrentPageDescription));
     }
-}
 
+    public void NavigateTo<TViewModel>(params object[] parameters) where TViewModel : ObservableObject
+    {
+        // Resolves TViewModel via DI, but lets you pass extra constructor
+        // arguments (like an existing DevCommand for edit mode) that aren't
+        // registered in the container.
+        CurrentViewModel = ActivatorUtilities.CreateInstance<TViewModel>(_services, parameters);
+        OnPropertyChanged(nameof(CurrentTitle));
+        OnPropertyChanged(nameof(CurrentPageDescription));
+    }
+}

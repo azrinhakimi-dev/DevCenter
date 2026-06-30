@@ -72,12 +72,6 @@ namespace DevCenter.ViewModel
         }
 
         [RelayCommand]
-        private void New()
-        {
-            _navigation.NavigateTo<CommandFormViewModel>();
-        }
-
-        [RelayCommand]
         private void Delete(DevCommand command)
         {
             _repo.Delete(command.Id);
@@ -200,6 +194,19 @@ namespace DevCenter.ViewModel
         private void ClearSearch()
         {
             SearchText = string.Empty;
+        }
+
+        [RelayCommand]
+        private void New()
+        {
+            _navigation.NavigateTo<CommandFormViewModel>();
+        }
+
+        [RelayCommand]
+        private void Edit(DevCommand command)
+        {
+            if (command is null) return;
+            _navigation.NavigateTo<CommandFormViewModel>(command);
         }
     }
 }
