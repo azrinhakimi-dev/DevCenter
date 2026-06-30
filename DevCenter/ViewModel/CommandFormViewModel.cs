@@ -13,6 +13,7 @@ namespace DevCenter.ViewModel
 
         [ObservableProperty]
         public string _header = "Add New Command";
+        public string PageDescription => "Save and run your frequently used scripts and shell commands.";
 
         [ObservableProperty]
         private string _name = string.Empty;

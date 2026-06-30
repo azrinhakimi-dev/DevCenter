@@ -21,14 +21,17 @@ namespace DevCenter
                 DataContext = provider.GetRequiredService<MainViewModel>()
             });
 
+            services.AddDbContext<AppDbContext>();
+
             services.AddTransient<HomeViewModel>();
             services.AddTransient<SnippetViewModel>();
             services.AddTransient<CommandViewModel>();
             services.AddTransient<CommandFormViewModel>();
-
-            services.AddDbContext<AppDbContext>();
+            services.AddTransient<SnippetFormViewModel>();
 
             services.AddScoped<DevCommandRepo>();
+            services.AddScoped<SnippetRepo>();
+
 
             _serviceProvider = services.BuildServiceProvider();
         }

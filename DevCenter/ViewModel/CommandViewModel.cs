@@ -16,6 +16,7 @@ namespace DevCenter.ViewModel
         private Process? _runningProcess;
 
         public string Header => "Commands";
+        public string PageDescription => "Save and run your frequently used scripts and shell commands.";
 
         [ObservableProperty]
         private ObservableCollection<DevCommand> _commands = [];
@@ -35,6 +36,11 @@ namespace DevCenter.ViewModel
         [ObservableProperty]
         private ObservableCollection<string> _activeCommandLines = [];
 
+        public record OutputBlock(string Kind, string Text); // Kind: "cmd" | "output" | "error" | "separator"
+
+        [ObservableProperty]
+        private ObservableCollection<OutputBlock> _outputBlocks = [];
+
         public CommandViewModel(DevCommandRepo repo, INavigationService navigation)
         {
             _repo = repo;
@@ -52,10 +58,17 @@ namespace DevCenter.ViewModel
             var filtered = _repo.GetAll()
                 .Where(c => string.IsNullOrWhiteSpace(value) ||
                             c.Name.Contains(value, StringComparison.OrdinalIgnoreCase) ||
-                            (c.Description ?? "").Contains(value, StringComparison.OrdinalIgnoreCase))
+                            (c.Description ?? "").Contains(value, StringComparison.OrdinalIgnoreCase) ||
+                            c.TagList.Any(t => t.Contains(value, StringComparison.OrdinalIgnoreCase)))
                 .ToList();
 
             Commands = new ObservableCollection<DevCommand>(filtered);
+        }
+
+        [RelayCommand]
+        private void FilterByTag(string tag)
+        {
+            SearchText = tag;
         }
 
         [RelayCommand]
@@ -78,6 +91,7 @@ namespace DevCenter.ViewModel
 
             IsRunning = true;
             Output = string.Empty;
+            OutputBlocks = [];
             ActiveCommand = command;
 
             var lines = command.Script
@@ -90,11 +104,18 @@ namespace DevCenter.ViewModel
 
             try
             {
-                foreach (var line in lines)
+                for (int i = 0; i < lines.Count; i++)
                 {
-                    // Print the command line first
+                    var line = lines[i];
+
+                    // Separator between commands
+                    if (i > 0)
+                        Application.Current.Dispatcher.Invoke(() =>
+                            OutputBlocks.Add(new OutputBlock("separator", string.Empty)));
+
+                    // Command line
                     Application.Current.Dispatcher.Invoke(() =>
-                        Output += $"$ {line}\n");
+                        OutputBlocks.Add(new OutputBlock("cmd", line)));
 
                     var process = new Process
                     {
@@ -116,14 +137,14 @@ namespace DevCenter.ViewModel
                     {
                         if (e.Data is null) return;
                         Application.Current.Dispatcher.Invoke(() =>
-                            Output += e.Data + "\n");
+                            OutputBlocks.Add(new OutputBlock("output", e.Data)));
                     };
 
                     process.ErrorDataReceived += (s, e) =>
                     {
                         if (e.Data is null) return;
                         Application.Current.Dispatcher.Invoke(() =>
-                            Output += $"[Error] {e.Data}\n");
+                            OutputBlocks.Add(new OutputBlock("error", e.Data)));
                     };
 
                     process.Start();
@@ -135,19 +156,15 @@ namespace DevCenter.ViewModel
                     if (!process.HasExited)
                         process.WaitForExit();
 
-                    Application.Current.Dispatcher.Invoke(() =>
-                        Output += "\n");
-
                     process.Dispose();
 
-                    // Stop remaining lines if user hit Stop
                     if (_runningProcess is null) break;
                 }
             }
             catch (Exception ex)
             {
                 Application.Current.Dispatcher.Invoke(() =>
-                    Output += $"\nFailed: {ex.Message}");
+                    OutputBlocks.Add(new OutputBlock("error", $"Failed: {ex.Message}")));
             }
             finally
             {
@@ -164,17 +181,18 @@ namespace DevCenter.ViewModel
             try
             {
                 _runningProcess.Kill(entireProcessTree: true);
-                Output += "\n[Stopped by user]";
+                Application.Current.Dispatcher.Invoke(() =>
+                    OutputBlocks.Add(new OutputBlock("error", "[Stopped by user]")));
             }
             catch (Exception ex)
             {
-                Output += $"\n[Stop failed: {ex.Message}]";
+                Application.Current.Dispatcher.Invoke(() =>
+                    OutputBlocks.Add(new OutputBlock("error", $"[Stop failed: {ex.Message}]")));
             }
             finally
             {
                 IsRunning = false;
                 _runningProcess = null;
-                // ActiveCommand intentionally kept — shows last ran command
             }
         }
 

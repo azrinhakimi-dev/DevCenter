@@ -9,6 +9,7 @@ namespace DevCenter.Services
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
         public DbSet<DevCommand> DevCommands { get; set; }
+        public DbSet<Snippet> Snippets { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder options)
         {

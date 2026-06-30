@@ -12,5 +12,10 @@ namespace DevCenter.Models
         public string Script { get; set; }
         public string Tags { get; set; }
         public DateTime Created { get; set; } = DateTime.UtcNow;
+
+        public List<string> TagList =>
+            (Tags ?? string.Empty)
+                .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .ToList();
     }
 }
